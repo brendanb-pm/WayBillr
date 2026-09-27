@@ -2,9 +2,9 @@
 
 ## Canonical standards
 
-For substantive project work, load and enforce the canonical standards from `https://github.com/brendanb-pm/Codex-Standards` at effective revision `6e696938e755672a3645102469928c0598342612`.
+For substantive project work, load and enforce the canonical standards from `https://github.com/brendanb-pm/Codex-Standards` at effective revision `79e27cab42c3ed22cb4a0ac28f8f51a1c65d197a`.
 
-At the first substantive task of a session, safely fetch the canonical repository without discarding local state. Verify `6e696938e755672a3645102469928c0598342612^{commit}` resolves, then load `Codex-Standards.md` and only task-triggered conditional modules from a read-only checkout or worktree at that revision. Do not copy, edit, commit, push, reset, or otherwise mutate canonical standards during WayBillr application execution. If the approved revision cannot be resolved or read safely, report `CANONICAL STANDARDS UNAVAILABLE` and stop substantive work.
+At the first substantive task of a session, safely fetch the canonical repository without discarding local state. Verify `79e27cab42c3ed22cb4a0ac28f8f51a1c65d197a^{commit}` resolves, then load `Codex-Standards.md` and only task-triggered conditional modules from a read-only checkout or worktree at that revision. Do not copy, edit, commit, push, reset, or otherwise mutate canonical standards during WayBillr application execution. If the approved revision cannot be resolved or read safely, report `CANONICAL STANDARDS UNAVAILABLE` and stop substantive work.
 
 ## Current project state and navigation
 
