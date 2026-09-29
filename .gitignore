@@ -1,0 +1,19 @@
+# Local/deployment configuration
+.clasp.json
+.env
+.env.*
+!.env.example
+
+# Google and local runtime artifacts
+.claspignore
+node_modules/
+*.log
+
+# Production or sensitive artifacts
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.heic
+waybills/
+extractions/
