@@ -1,34 +1,15 @@
 # Current ingestion flow
 
-## Proven from supplied source
+The pilot supersedes the preserved unread/reply workflow at baseline
+`cb58d5f08fe2efc977e67820425644bfbc84a455`.
 
-1. Build a Gmail query: `to:<configured inbox> is:unread has:attachment`.
-2. Search at most 20 Gmail threads per execution.
-3. Iterate each message in each returned thread, skipping messages that are not unread.
-4. Iterate every message attachment.
-5. Continue only for `image/*` attachments or `application/pdf`; other MIME types are ignored.
-6. Save each qualifying attachment to the configured Drive folder.
-7. Base64-encode the attachment and call Gemini 2.5 Flash `generateContent`.
-8. Parse the returned JSON and derive a review status from signature presence, confidence, and issues.
-9. Append one 24-value row to the active sheet.
-10. Reply to the driver with captured details and, when applicable, review warnings.
-11. Mark the message read, then mark the thread read.
+1. Validate Script Properties, resource bindings and the exact ledger headers under a script lock.
+2. List messages with the configured **user label** through Gmail's read-only API and recheck each message's label before processing.
+3. Dry-run counts supported attachment metadata only and performs no ingestion writes or external extraction.
+4. For live processing, identify the MIME part/attachment and hash its bytes. Skip completed identities, retain aliases for identical-content resubmissions, and persist new reservations.
+5. Reconcile the preallocated Drive ID; retain the original without modifying Gmail.
+6. Extract through Gemini using header-held API credentials, strict output schema, and deterministic value validation. Missing fields stay blank. Suspicious values and every pilot row require human review.
+7. Persist the exact 24-cell payload, then atomically write its reserved shipment row and DONE journal record. Reconcile uncertain outcomes before retry.
+8. Advance the Gmail page cursor only if the page completes; processing/count/time/size/attempt limits bound work.
 
-## Processing granularity
-
-The unit is one qualifying attachment:
-
-```text
-EMAIL THREAD -> MESSAGE -> QUALIFYING ATTACHMENT
-  -> one Drive file -> one Gemini call -> one Sheet row -> one driver reply
-```
-
-Multiple attachments are not aggregated into a multi-page waybill.
-
-## Error path
-
-The qualifying-attachment work is wrapped in `try/catch`. Errors are logged with the Gmail message ID and error text, and an error row is appended. The source then continues through the attachment/message loops. Message and thread read-state changes occur after their respective loops.
-
-## Not verified externally
-
-No Gmail, Drive, Gemini, Sheets, email-reply, or trigger execution was performed in this baseline task.
+Failures retain originals and journal evidence; no email is sent, no read/unread state changes, no source deletion, and no error shipment rows. PDFs/JPEG/PNG/WebP attachments are independent units. Multi-photo aggregation, semantic cross-scan deduplication, accounting approval and automatic billing are out of scope. See [architecture](architecture.md) and [operator procedures](../apps-script/README.md).

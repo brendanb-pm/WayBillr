@@ -17,3 +17,6 @@ node_modules/
 *.heic
 waybills/
 extractions/
+
+# Local delivery evidence (no runtime/customer artifacts)
+output/

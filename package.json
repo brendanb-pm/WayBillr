@@ -1,0 +1,7 @@
+{
+  "name": "waybillr-pilot",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {"test": "node --test tests/pilot.test.cjs", "check": "node tools/verify.cjs"},
+  "engines": {"node": ">=22"}
+}
