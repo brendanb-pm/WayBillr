@@ -1,0 +1,17 @@
+{
+  "TENANT_ID": "<unique-customer-installation-slug>",
+  "GMAIL_LABEL": "WayBillr/Pilot",
+  "DRIVE_FOLDER_ID": "<dedicated-folder-id>",
+  "SPREADSHEET_ID": "<dedicated-empty-workbook-id>",
+  "LEDGER_SHEET": "Shipments",
+  "GEMINI_API_KEY": "<set-only-in-script-properties>",
+  "GEMINI_MODEL": "<approved-available-model-id>",
+  "DRY_RUN": "true",
+  "SCHEDULE_ENABLED": "false",
+  "DATA_HANDLING_APPROVED": "false",
+  "MAX_MESSAGES": "20",
+  "MAX_ATTACHMENTS": "10",
+  "MAX_ATTACHMENT_BYTES": "4000000",
+  "MAX_RUN_SECONDS": "200",
+  "MAX_ATTEMPTS": "3"
+}

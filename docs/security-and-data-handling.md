@@ -1,31 +1,29 @@
-# Security and data handling
+# Pilot security and data handling
 
-## Baseline boundaries
+GitHub contains source, secret-free templates and synthetic tests only. Customer Gmail content, originals, extraction, journal, runtime logs, credentials and resource IDs stay out of GitHub. The runtime stores originals in the dedicated customer Drive folder and shipment/extraction/source audit records in the dedicated workbook. Selected bytes are sent to the Gemini Developer API under its own [terms](https://ai.google.dev/gemini-api/terms); [Gemini approval](gemini-setup.md) is a separate gate.
 
-The source handles potentially sensitive email attachments, extracted shipment details, sender information, Drive URLs, and operational ledger data. The repository contains source only; it does not contain production messages, waybills, images, spreadsheets, extraction output, logs, or credentials.
+## Reviewed authorization scopes
 
-The committed configuration values are placeholders:
+| Manifest scope suffix | Purpose / limit |
+|---|---|
+| `gmail.readonly` | List user labels, account profile and explicitly labeled message payloads/attachment bytes. Does not permit sending, deleting, relabeling or read-state mutation. It grants mailbox-wide read capability; code narrows selection to the configured label. |
+| `drive` | Read the manually supplied existing folder, stamp installation metadata, generate IDs, reconcile and create original files in that folder. This simple standalone installer has no Drive Picker/file-selection grant; `drive.file` does not automatically grant access to an arbitrary manually entered folder ID. Full Drive scope is broad: consent must be reviewed and project editors trusted. No delete, share, move or update of document content is implemented. |
+| `spreadsheets` | Read/initialize the manually supplied workbook and atomically update shipment/journal tabs. A standalone project with an arbitrary workbook ID needs this scope; no other workbook is queried. |
+| `script.external_request` | Call the fixed HTTPS Gemini endpoint through UrlFetchApp. Model ID validation prevents path/query injection; API key goes in the header and redirects are disabled. |
+| `script.scriptapp` | Explicitly install/remove this project's optional hourly trigger. No trigger is installed by default. |
 
-- `YOUR_GEMINI_API_KEY`
-- `waybills@examplecompany.com`
-- `YOUR_GOOGLE_DRIVE_FOLDER_ID`
+No Gmail send/modify, Calendar, Contacts, or external desktop credential scopes. See [Apps Script scopes](https://developers.google.com/apps-script/concepts/scopes) and [Gmail message label selection](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/list). OAuth permits more Drive/Sheets access than this code uses: resource binding and review are application controls, not provider-level sandboxing.
 
-They are not live credentials or production identifiers. No secrets were removed from the supplied source because none were present.
+## Isolation and safe operation
 
-## Proven from supplied source
+Separate Apps Script project, Google authorization, API key/project as appropriate, tenant slug, folder and workbook per customer. Bindings prevent accidental retargeting of an initialized project or reuse of a marked destination. The fingerprint includes the effective Gmail account and script ID. Do not clear binding/state or share installation resources to bypass a mismatch. Simultaneous installers in different projects are not supported; provision serially under one owner. No customer data is fetched during development.
 
-- Attachments are persisted to Drive before extraction success is known.
-- The Gemini key is included in the request URL through a source constant.
-- Gmail, Drive, Sheets, and outbound HTTP access are direct Apps Script service calls.
-- Error text is written to the Apps Script log and included in an error-row status value.
-- Driver replies include extracted fields and the Drive archive URL.
+`LockService` excludes concurrent runs of one script. Journal retries reconcile unknown outcomes. Structured logs include event, hashed attachment key and safe error code only; even these are operational metadata and remain private. Exception logging is disabled in the manifest, and the public processing entry point sanitizes thrown provider exceptions. Setup/provider authorization errors can still be shown by Google's own editor UI; never copy raw execution/provider output into public issues.
 
-## Baseline limitations
+Script Properties are not a vault against project editors: minimize and audit editors, OAuth grants, folder/workbook sharing and key access. Protect journal/binding/ledger tabs from structural edits and use filter views. Do not sort/insert/delete rows while the pilot owns fixed row coordinates. Store human accounting decisions in a separate controlled workflow. On disable, retain Gmail, Drive originals and journal so recovery remains possible.
 
-The source has no explicit idempotency key or deduplication mechanism, retry/backoff policy, HTTP-status validation before candidate dereference, or structured schema validation after JSON parsing. These are documented observations, not remediated defects in this preservation story.
+Deterministic validation bounds output types/lengths, flags missing required fields, impossible/unclear dates, suspicious numeric/payment values, uncertain signature and low confidence. Cell writes use literal string values, preventing formula execution from sender/model text. All pilot rows require human review regardless of confidence; no email, automatic billing, deletion or read-state writes exist. Source identity and content hashes do not prove a document's truth or authenticity.
 
-The `.gitignore` excludes local configuration and document/image artifacts. It does not replace the requirement to review staged content before every commit.
+## Development checks and remaining boundary
 
-## Not verified externally
-
-Permissions, account ownership, Drive sharing, Gmail retention, deployed secrets, and production data-handling controls were not inspected or changed.
+The dependency-free test suite exercises denial paths, cross-tenant/account/script changes, foreign folder binding, unknown outcomes, concurrency, duplicate identities/content, malformed output, and formula injection. Static checks audit scopes, defaults, forbidden Gmail mutations and common secret signatures. A diff/content review is still necessary: pattern scanning cannot prove absence of every secret. The live owner must inspect OAuth consent, sharing, billing/data settings, label boundaries, actual advanced-service behavior, runtime quota and logs before business use. Offline tests do not establish any live result.
